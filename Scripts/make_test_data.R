@@ -3,7 +3,7 @@ install.packages("pacman")
 pacman::p_load("tidyverse", "readxl")
 
 #Import data
-Pseudo_res_data <- read_excel("Pseudo_res_data.xlsx")
+Pseudo_res_data <- read_excel("input/Pseudo_res_data.xlsx")
 
 
 # Remove ESBL (later problem...)
