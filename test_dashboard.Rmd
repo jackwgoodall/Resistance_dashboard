@@ -1,0 +1,81 @@
+---
+title: "Example Resistance Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    vertical_layout: scroll
+knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding=encoding, output_dir = "output") })
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  # cache = TRUE,
+  fig.height = 5,
+  echo = FALSE
+)
+
+library(crosstalk)
+library(dplyr)
+library(glue)
+library(plotly)
+```
+
+```{js}
+const setDefaultValue = function(filterId, defaultValue) {
+  window.addEventListener("load", function(event) { 
+    document.getElementById(filterId).getElementsByClassName("selectized")[0].selectize.setValue(defaultValue, false);
+  });
+};
+```
+
+# Overview
+
+## Column
+
+### Background
+
+This is a minimal dataset (only looking at ESCO and KLPN isolated from blood cultures May this year and only a few antibiotics). It shows the basic functionality but clearly has a long was to go. We would love your feedback and what functionalities you would like to see. 
+
+# Test dataset
+
+```{r}
+pseudo_data <- readRDS("output/results/test_data.rds")
+shared_data <- pseudo_data %>%
+  arrange(n) %>%
+  SharedData$new()
+```
+
+## Sidebar {.sidebar}
+
+```{r}
+filter_select("organism_choice", "Choose an organism", shared_data, ~Organism, multiple = FALSE)
+```
+
+```{js}
+setDefaultValue("organism_choice", "ESCO");
+```
+
+## Column
+
+### Antibiotic sensitivity by organism
+
+```{r}
+shared_data %>%
+  plot_ly() %>%
+  add_bars(
+    x = ~percentage, 
+    y = ~Antibiotic, 
+    text = ~paste0("n=", total, ", ", round(percentage, 1), "%"), 
+    textposition = "inside", 
+    cliponaxis = FALSE, 
+    name = ~ifelse(Sensitivity == "R", "Resistant", "Sensitive"), 
+    color = ~Sensitivity, 
+    colors = c("R" = "darkred", "S" = "darkgreen")
+  ) %>%
+  layout(
+    xaxis = list(title = "Percentage", range = c(0, 100)),
+    yaxis = list(title = "", categoryorder = "trace"),
+    barmode = "stack",
+    showlegend = TRUE,
+    legend = list(title = list(text = "Sensitivity"), itemsizing = 'constant')
+  )
+```
