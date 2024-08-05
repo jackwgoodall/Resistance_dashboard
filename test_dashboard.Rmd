@@ -27,13 +27,22 @@ const setDefaultValue = function(filterId, defaultValue) {
 };
 ```
 
+```{js}
+const removeAllOption = function(filterId) {
+  window.addEventListener("load", function(event) {
+    var selectizeControl = document.getElementById(filterId).getElementsByClassName("selectized")[0].selectize;
+    selectizeControl.removeOption(''); // Remove the "All" option
+  });
+};
+```
+
 # Overview
 
 ## Column
 
 ### Background
 
-This is a minimal dataset (only looking at ESCO and KLPN isolated from blood cultures May this year and only a few antibiotics). It shows the basic functionality but clearly has a long was to go. We would love your feedback and what functionalities you would like to see. 
+This is a minimal dataset (only looking at ESCO and KLPN isolated from blood cultures May this year and only a few antibiotics). It shows the basic functionality but clearly has a long was to go. We would love your feedback and what functionalities you would like to see.
 
 # Test dataset
 
@@ -52,6 +61,7 @@ filter_select("organism_choice", "Choose an organism", shared_data, ~Organism, m
 
 ```{js}
 setDefaultValue("organism_choice", "ESCO");
+removeAllOption("organism_choice");
 ```
 
 ## Column
@@ -92,11 +102,12 @@ shared_data_ESBL <- pseudo_data_ESBL %>%
 ## Sidebar {.sidebar}
 
 ```{r}
-filter_select("organism_choice", "Choose an organism", shared_data, ~Organism, multiple = FALSE)
+filter_select("organism_choice_ESBL", "Choose an organism", shared_data_ESBL, ~Organism, multiple = FALSE)
 ```
 
 ```{js}
-setDefaultValue("organism_choice", "ESCO");
+setDefaultValue("organism_choice_ESBL", "ESCO");
+removeAllOption("organism_choice_ESBL");
 ```
 
 ## Column
@@ -126,3 +137,6 @@ shared_data_ESBL %>%
     legend = list(title = list(text = "Sensitivity"), itemsizing = 'constant')
   )
 ```
+
+### Note
+This shows isolates that were *phenotypically* sensitive to amoxicillin and co-amoxiclav but had an ESBL mechanism detected on ESBL plates as orange.
