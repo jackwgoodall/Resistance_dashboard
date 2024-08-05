@@ -79,3 +79,50 @@ shared_data %>%
     legend = list(title = list(text = "Sensitivity"), itemsizing = 'constant')
   )
 ```
+
+# Test dataset ESBL variation no.1
+
+```{r}
+pseudo_data_ESBL <- readRDS("output/results/test_data_ESBL.rds")
+shared_data_ESBL <- pseudo_data_ESBL %>%
+  arrange(n) %>%
+  SharedData$new()
+```
+
+## Sidebar {.sidebar}
+
+```{r}
+filter_select("organism_choice", "Choose an organism", shared_data, ~Organism, multiple = FALSE)
+```
+
+```{js}
+setDefaultValue("organism_choice", "ESCO");
+```
+
+## Column
+
+### Antibiotic sensitivity by organism
+
+```{r}
+shared_data_ESBL %>%
+  plot_ly() %>%
+  add_bars(
+    x = ~percentage, 
+    y = ~Antibiotic, 
+    text = ~paste0("n=", total, ", ", round(percentage, 1), "%"), 
+    textposition = "inside", 
+    cliponaxis = FALSE, 
+    name = ~case_when(Sensitivity_ESBL == "R" ~ "Resistant", 
+                      Sensitivity_ESBL == "S" ~ "Sensitive", 
+                      Sensitivity_ESBL == "E" ~ "ESBL"), 
+    color = ~Sensitivity_ESBL, 
+    colors = c("R" = "darkred", "S" = "darkgreen", "E" = "orange")
+  ) %>%
+  layout(
+    xaxis = list(title = "Percentage", range = c(0, 100)),
+    yaxis = list(title = "", categoryorder = "trace"),
+    barmode = "stack",
+    showlegend = TRUE,
+    legend = list(title = list(text = "Sensitivity"), itemsizing = 'constant')
+  )
+```
