@@ -1,5 +1,0 @@
-PARAMETERS [Start dd/mm/yy] DateTime, [End dd/mm/yy] DateTime;
-SELECT DISTINCT dbo_M_All_c_Abs.[Date Ordered], dbo_M_All_c_Abs.age, dbo_M_All_c_Abs.Sex, dbo_M_All_c_Abs.SpecNo, dbo_M_All_c_Abs.Organism, dbo_M_All_c_Abs.Antibiotic, dbo_M_All_c_Abs.Sensitivity
-FROM dbo_M_All_c_Abs
-WHERE (((dbo_M_All_c_Abs.[Date Ordered])>=[Start dd/mm/yy] And (dbo_M_All_c_Abs.[Date Ordered])<=[End dd/mm/yy]) AND ((dbo_M_All_c_Abs.SpecNo) Like "MB*") AND ((dbo_M_All_c_Abs.Organism)="ESCO" Or (dbo_M_All_c_Abs.Organism)="KLPN") AND ((dbo_M_All_c_Abs.Antibiotic) In ("AMC","AMX","CEX","CIP","FOS","MEC","NIT","TRI","GEN","AMPC+","ESBL+","INDAMP")))
-ORDER BY dbo_M_All_c_Abs.[Date Ordered] DESC;
