@@ -60,7 +60,7 @@ It includes isolates from `r format(Start, "%d/%m/%Y")` to the `r format(End, "%
 
 This dataset includes `r format(isolate_numbers, big.mark = ",")` organisms, from `r format(specimen_numbers, big.mark = ",")` specimens, from `r format(patient_numbers, big.mark = ",")` different patients.
 
-If you would like help localising this or have a problem please open a GitHub issue.  If you want to get in touch or to can't share your question publicaly then email me <a href="mailto:j.goodall8@sheffield.ac.ukc?subject=resistance%20dashboard%20feature%20request"</a>
+If you would like help localising this or have a problem please open a GitHub issue.  If you would like help localising this or have a problem, please open a GitHub issue. If you want to get in touch but can’t share your question publicly, you can email me at [j.goodall8@sheffield.ac.uk](mailto:j.goodall8@sheffield.ac.uk?subject=resistance%20dashboard%20feature%20request).
 
 # All Samples {.tabset}
 
