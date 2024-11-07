@@ -22,7 +22,7 @@ if(!dir.exists("output/results")) {
   dir.create("output/results", recursive = TRUE)
 }
 
-### Delete the files from data (i.e. a clean start)
+### Delete the files from data (i.e. a clean start).  This ensures that if anything fails, you don't just get shown old data. 
 # Define the path to the 'output' directory
 output_dir <- here("output/data")
 
@@ -36,40 +36,31 @@ files_only <- all_items[!file.info(all_items)$isdir]
 file.remove(files_only)
 
 
-### Save the date
+### Save the date vectors
 save(Start, End, file = "output/data/Dates.Rdata")
 
-
-### Run the SQL script
-source("scripts/SQL.R", local=new.env())
+################### ## This could be either running e.g. a SQL query in a script (see README) or importing an excel/csv
+### IMPORT THE DATA ## For the sake of a reproducible example I've used csv import here but I would strongly 
+################### ## recommend a database search function if you can. 
+df <- read_csv("dummy_data.csv", 
+               col_types = cols(DTC = col_datetime(format = "%d/%m/%Y %H:%M")))
+save(df, file = "output/data/df.Rdata")
 
 ### Main formatting 
 source("scripts/format_main_data.R", local=new.env())
 
 ### Make the tables 
 
-# make BC tables
-source("scripts/make_BC_tables.R", local=new.env())
-
-# make faecs tables
-source("scripts/make_faecs_tables.R", local=new.env())
-
 # make main tables
 source("scripts/make_main_tables.R", local=new.env())
-
-# make resp tables
-source("scripts/make_resp_tables.R", local=new.env())
 
 # make urine tables
 source("scripts/make_urine_tables.R", local=new.env())
 
-# make wound tables
-source("scripts/make_wound_tables.R", local=new.env())
-
 
 # Render the dashboard to HTML
 rmarkdown::render(
-  here::here("STH_dashboard.Rmd"),
+  here::here("resistance_dashboard.Rmd"),
   output_dir = "output/results",
   output_file = glue::glue("{html_output_name}.html"),
   envir = new.env()
