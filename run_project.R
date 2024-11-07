@@ -1,14 +1,18 @@
 ################################################################################
-# To build you need the right source file (which can be extracted by C&P the SQL 
-# command) and placed into the input folder.
+# To build you need to enter the dates required below.
 # You should then be able to generate an html into the 'output' folder running
-# this file.
-# I've hashed out some stuff at the bottom which should make an archive... 
-# Future problem... 
+# this file (clicking 'Source')
 ################################################################################
 
-html_output_name <- "Test Data Dashboard"
+Start <- as.Date("01/06/2023", format = "%d/%m/%Y") ## Enter this as dd/mm/YYYY
+
+End <- as.Date("01/06/2024", format = "%d/%m/%Y") ## Enter this as dd/mm/YYYY
+
+
+html_output_name <- paste("STH Resistance Dashboard", format(Sys.Date(), "%d-%m-%Y"))
 code_output_name <- "Example Dashboard - R source code"
+
+pacman::p_load(tidyverse, flexdashboard, here)
 
 # Create output directories if they don't exist
 if(!dir.exists("output/data")) {
@@ -18,26 +22,55 @@ if(!dir.exists("output/results")) {
   dir.create("output/results", recursive = TRUE)
 }
 
-# Import and clean the raw data
-source("scripts/make_test_data.R", local=new.env())
+### Delete the files from data (i.e. a clean start)
+# Define the path to the 'output' directory
+output_dir <- here("output/data")
+
+# List all files and directories in the 'output' directory
+all_items <- list.files(output_dir, full.names = TRUE)
+
+# Filter out directories and only keep files
+files_only <- all_items[!file.info(all_items)$isdir]
+
+# Delete all files
+file.remove(files_only)
+
+
+### Save the date
+save(Start, End, file = "output/data/Dates.Rdata")
+
+
+### Run the SQL script
+source("scripts/SQL.R", local=new.env())
+
+### Main formatting 
+source("scripts/format_main_data.R", local=new.env())
+
+### Make the tables 
+
+# make BC tables
+source("scripts/make_BC_tables.R", local=new.env())
+
+# make faecs tables
+source("scripts/make_faecs_tables.R", local=new.env())
+
+# make main tables
+source("scripts/make_main_tables.R", local=new.env())
+
+# make resp tables
+source("scripts/make_resp_tables.R", local=new.env())
+
+# make urine tables
+source("scripts/make_urine_tables.R", local=new.env())
+
+# make wound tables
+source("scripts/make_wound_tables.R", local=new.env())
+
 
 # Render the dashboard to HTML
 rmarkdown::render(
-  here::here("test_dashboard.Rmd"),
-  output_dir = "output",
+  here::here("STH_dashboard.Rmd"),
+  output_dir = "output/results",
   output_file = glue::glue("{html_output_name}.html"),
   envir = new.env()
 )
-# Create a ZIP archive with the HTML dashboard
-#zip::zipr(
-#  zipfile = glue::glue("output/{html_output_name}.zip"),
- # files = glue::glue("output/{html_output_name}.html")
-#)
-
-# Create a ZIP archive with the source code
-#files <- list.files()
-#files <- files[!grepl("^output$", files)] # Don't include output folder
-#zip::zipr(
-#  zipfile = glue::glue("output/{code_output_name}.zip"),
-#  files = files
-#)

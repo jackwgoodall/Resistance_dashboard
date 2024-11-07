@@ -1,0 +1,340 @@
+---
+title: "Resistance Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    vertical_layout: fill
+knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding=encoding, output_dir = "output") })
+---
+```{css, echo=FALSE}
+#scrollable {
+  max-height: 700px; /* Might need changing depending on monitor sizes... */
+  overflow-y: scroll; /* Enable vertical scrolling */
+}
+```
+
+```{r setup packages, include=FALSE}
+knitr::opts_chunk$set(
+   cache = FALSE,
+  fig.height = 5,
+  echo = FALSE
+)
+pacman::p_load(crosstalk, tidyverse, glue, plotly, ggplot2, reshape2)
+```
+
+```{r setup load data}
+load("output/data/main_table.Rdata")
+load("output/data/Dates.Rdata")
+load("output/data/isolate_numbers.Rdata")
+```
+
+```{js}
+const setDefaultValue = function(filterId, defaultValue) {
+  window.addEventListener("load", function(event) { 
+    document.getElementById(filterId).getElementsByClassName("selectized")[0].selectize.setValue(defaultValue, false);
+  });
+};
+```
+
+```{js}
+const removeAllOption = function(filterId) {
+  window.addEventListener("load", function(event) {
+    var selectizeControl = document.getElementById(filterId).getElementsByClassName("selectized")[0].selectize;
+    selectizeControl.removeOption(''); // Remove the "All" option
+  });
+};
+```
+
+# Intro
+
+This is an example of a resistance dashboard.  It is intended as a template for you to use locally and adapt to your needs. 
+
+It is distributed under an MIT license, meaning I can't accept any responsiblity for stuff going wrong as a result of it, but you are completely free to use and adapt it to any end you see fit.
+
+Below are some auto-calculations about the pipeline that I think are useful to see:
+
+This pipeline was run on the `r format(Sys.Date(), "%d/%m/%Y")`
+
+It includes isolates from `r format(Start, "%d/%m/%Y")` to the `r format(End, "%d/%m/%Y")`
+
+This dataset includes `r format(isolate_numbers, big.mark = ",")` organisms, from `r format(specimen_numbers, big.mark = ",")` specimens, from `r format(patient_numbers, big.mark = ",")` different patients.
+
+If you would like help localising this or have a problem please open a GitHub issue.  If you want to get in touch or to can't share your question publicaly then email me <a href="mailto:j.goodall8@sheffield.ac.ukc?subject=resistance%20dashboard%20feature%20request"</a>
+
+# All Samples {.tabset}
+
+```{r}
+# Create a custom order for the organisms
+custom_order_main <- c("Gram Negatives", "Gram Positives", "Enterobacteriaceae", "Anaerobes", "Fungi",  "--------------------", setdiff(sort(unique(main_table$OrgDescrip_new)), c("Gram Negatives", "Gram Positives", "Anaerobes", "Fungi", "Enterobacteriaceae", "--------------------")))
+
+# Re-order the data based on the custom order
+main_table <- main_table %>%
+  mutate(OrgDescrip_new = factor(OrgDescrip_new, levels = custom_order_main),
+         Sensitivity_discrep = factor(Sensitivity_discrep, levels = c("Sensitive", "Increased exposure", "Discrepant phenotype*", "Resistant"))
+         ) %>%
+         arrange(Antibiotic)
+
+shared_data_main_table <- main_table %>%
+  SharedData$new()
+```
+
+## Sidebar {.sidebar}
+
+```{r}
+# Filter select input with custom order and separator
+filter_select("organism_choice", "Choose an organism", shared_data_main_table, ~OrgDescrip_new, multiple = FALSE)
+```
+
+```{js}
+setDefaultValue("organism_choice", "Gram Negatives");
+removeAllOption("organism_choice");
+```
+
+*Discrepant phenotype means that the organism is phenotypically sensitive to that antibiotic, but carries a resistance mechanism which would make clinical failure possible.  (e.g an ESBL testing sensitive to co-amoxiclav or a CPE testing sensitive to meropenem.)
+
+## Column
+
+```{r, fig.width=10}
+shared_data_main_table %>%
+  plot_ly() %>%
+  add_bars(
+    x = ~percentage, 
+    y = ~Antibiotic_new, 
+    text = ~paste0("total=", total), 
+    textposition = "none",
+    cliponaxis = FALSE, 
+    outsidetextfont = list(color = "black"),
+    color = ~Sensitivity_discrep, 
+    colors = c("Resistant" = "darkred", "Sensitive" = "chartreuse3", "Increased exposure" = "orange", "Discrepant phenotype*" = "purple")
+  ) %>%
+  layout(
+    height = 900,  # Set a fixed total height
+    xaxis = list(title = "Percentage", range = c(0, 100),
+                 categoryorder = "array"),  # Use 'array' to control the ordering
+    yaxis = list(
+      title = "", 
+      categoryorder = "category descending",
+      automargin = TRUE,
+      tickmode = "linear",
+      ticks = "outside", 
+      showticklabels = TRUE,
+      dtick = 1,
+      range = NULL,  # Allows scrolling for more entries than max_visible_entries
+      fixedrange = FALSE  # Allow you to scroll through the entries
+    ),
+    barmode = "stack",
+    legend = list(
+      title = list(text = "Sensitivity"),
+      itemsizing = 'constant',
+      orientation = "v",  # vertical orientation
+      x = 1.4,  # move the legend to the right
+      y = 1,  # move the legend to the top
+      xanchor = "right",  # anchor legend to the right
+      yanchor = "top",    # anchor legend to the top
+      bgcolor = "rgba(255, 255, 255, 0.7)",  # Add a semi-transparent background to avoid overlap
+      bordercolor = "black",  # Optional: Add a border for better visibility
+      borderwidth = 1  # Optional: Border width
+    ),
+    margin = list(l = 50, r = 200, b = 50, t = 50, pad = 4)  # Adjust margins to make space for the legend and reduce left blank space
+  )
+```
+
+# Urines {.tabset}
+
+```{r load urine data}
+load("output/data/urine_all_table.Rdata")
+load("output/data/urine_IP_table.Rdata")
+load("output/data/urine_GP_table.Rdata")
+```
+
+```{r}
+# Create a custom order for the organisms
+custom_order_urine_all <- c("Gram Negatives", "Gram Positives", "Enterobacteriaceae", "Anaerobes", "Fungi",  "--------------------", setdiff(sort(unique(urine_all_table$OrgDescrip_new)), c("Gram Negatives", "Gram Positives", "Anaerobes", "Fungi", "Enterobacteriaceae", "--------------------")))
+
+# Re-order the data based on the custom order
+urine_all_table <- urine_all_table %>%
+  mutate(OrgDescrip_new = factor(OrgDescrip_new, levels = custom_order_urine_all),
+         Sensitivity_discrep = factor(Sensitivity_discrep, levels = c("Sensitive", "Increased exposure", "Discrepant phenotype*", "Resistant"))
+         ) %>%
+         arrange(Antibiotic)
+
+shared_data_urine_all_table <- urine_all_table %>%
+  SharedData$new(~OrgDescrip_new, group = "urine")
+
+urine_IP_table <- urine_IP_table %>%
+  mutate(Sensitivity_discrep = factor(Sensitivity_discrep, levels = c("Sensitive", "Increased exposure", "Discrepant phenotype*", "Resistant"))
+  ) 
+
+
+shared_data_urine_IP_table <- urine_IP_table %>%
+  SharedData$new(~OrgDescrip_new, group = "urine")
+
+urine_GP_table <- urine_GP_table %>%
+  mutate(Sensitivity_discrep = factor(Sensitivity_discrep, levels = c("Sensitive", "Increased exposure", "Discrepant phenotype*", "Resistant"))
+  ) 
+
+
+shared_data_urine_GP_table <- urine_GP_table %>%
+  SharedData$new(~OrgDescrip_new, group = "urine")
+```
+
+## Sidebar {.sidebar}
+
+```{r}
+# Filter select input with custom order and separator
+filter_select("organism_choice_urine_all", "Choose an organism", shared_data_urine_all_table, ~OrgDescrip_new, multiple = FALSE)
+```
+
+```{js}
+setDefaultValue("organism_choice_urine_all", "Gram Negatives");
+removeAllOption("organism_choice_urine_all");
+```
+
+*Discrepant phenotype means that the organism has tested phenotypically sensitive to that antibiotic, but carries a resistance mechanism which would make clinical failure possible.  (e.g an ESBL testing sensitive to co-amoxiclav or a CPE testing sensitive to meropenem.)
+
+## Column {.tabset}
+
+### All
+<div id="scrollable">
+```{r, fig.width=10}
+
+  shared_data_urine_all_table %>%
+    plot_ly() %>%
+    add_bars(
+      x = ~percentage, 
+      y = ~Antibiotic_new, 
+      text = ~paste0("total=", total), 
+      textposition = "none",
+      cliponaxis = FALSE, 
+      outsidetextfont = list(color = "black"),
+      color = ~Sensitivity_discrep, 
+      colors = c("Resistant" = "darkred", "Sensitive" = "chartreuse3", "Increased exposure" = "orange", "Discrepant phenotype*" = "purple")
+    ) %>%
+    layout(
+      height = 1200,  # Set a fixed total height
+      xaxis = list(title = "Percentage", range = c(0, 100),
+                   categoryorder = "array"),
+      yaxis = list(
+        title = "", 
+        categoryorder = "category descending",
+        automargin = TRUE,
+        tickmode = "linear",
+        ticks = "outside", 
+        showticklabels = TRUE,
+        dtick = 1,
+        fixedrange = FALSE
+      ),
+      barmode = "stack",
+      legend = list(
+        title = list(text = "Sensitivity"),
+        itemsizing = 'constant',
+        orientation = "v",  
+        x = 1.5,  
+        y = 1,  
+        xanchor = "right",  
+        yanchor = "top",    
+        bgcolor = "rgba(255, 255, 255, 0.7)",
+        bordercolor = "black",
+        borderwidth = 1
+      ),
+      margin = list(l = 50, r = 320, b = 50, t = 50, pad = 4)
+    )
+
+```
+</div>
+
+### Inpatients Only
+<div id="scrollable">
+```{r, fig.width=10}
+shared_data_urine_IP_table %>%
+  plot_ly() %>%
+  add_bars(
+    x = ~percentage, 
+    y = ~Antibiotic_new, 
+    text = ~paste0("total=", total), 
+    textposition = "none",
+    cliponaxis = FALSE, 
+    outsidetextfont = list(color = "black"),
+    color = ~Sensitivity_discrep, 
+    colors = c("Resistant" = "darkred", "Sensitive" = "chartreuse3", "Increased exposure" = "orange", "Discrepant phenotype*" = "purple")
+  ) %>%
+  layout(
+    height = 1200,  # Set a fixed total height
+    xaxis = list(title = "Percentage", range = c(0, 100),
+                 categoryorder = "array"),  # Use 'array' to control the ordering
+    yaxis = list(
+      title = "", 
+      categoryorder = "category descending",
+      automargin = TRUE,
+      tickmode = "linear",
+      ticks = "outside", 
+      showticklabels = TRUE,
+      dtick = 1,
+      range = NULL,  # Allows scrolling for more entries than max_visible_entries
+      fixedrange = FALSE  # Allow you to scroll through the entries
+    ),
+    barmode = "stack",
+    legend = list(
+      title = list(text = "Sensitivity"),
+      itemsizing = 'constant',
+      orientation = "v",  # vertical orientation
+      x = 1.5,  # move the legend to the right
+      y = 1,  # move the legend to the top
+      xanchor = "right",  # anchor legend to the right
+      yanchor = "top",    # anchor legend to the top
+      bgcolor = "rgba(255, 255, 255, 0.7)",  # Add a semi-transparent background to avoid overlap
+      bordercolor = "black",  # Optional: Add a border for better visibility
+      borderwidth = 1  # Optional: Border width
+    ),
+    margin = list(l = 50, r = 320, b = 50, t = 50, pad = 4)  # Adjust margins to make space for the legend and reduce left blank space
+  )
+```
+</div>
+
+### GP Only
+<div id="scrollable">
+```{r, fig.width=10}
+shared_data_urine_GP_table %>%
+  plot_ly() %>%
+  add_bars(
+    x = ~percentage, 
+    y = ~Antibiotic_new, 
+    text = ~paste0("total=", total), 
+    textposition = "none",
+    cliponaxis = FALSE, 
+    outsidetextfont = list(color = "black"),
+    color = ~Sensitivity_discrep, 
+    colors = c("Resistant" = "darkred", "Sensitive" = "chartreuse3", "Increased exposure" = "orange", "Discrepant phenotype*" = "purple")
+  ) %>%
+  layout(
+    height = 1200,  # Set a fixed total height
+    xaxis = list(title = "Percentage", range = c(0, 100),
+                 categoryorder = "array"),  # Use 'array' to control the ordering
+    yaxis = list(
+      title = "", 
+      categoryorder = "category descending",
+      automargin = TRUE,
+      tickmode = "linear",
+      ticks = "outside", 
+      showticklabels = TRUE,
+      dtick = 1,
+      range = NULL,  # Allows scrolling for more entries than max_visible_entries
+      fixedrange = FALSE  # Allow you to scroll through the entries
+    ),
+    barmode = "stack",
+    legend = list(
+      title = list(text = "Sensitivity"),
+      itemsizing = 'constant',
+      orientation = "v",  # vertical orientation
+      x = 1.5,  # move the legend to the right
+      y = 1,  # move the legend to the top
+      xanchor = "right",  # anchor legend to the right
+      yanchor = "top",    # anchor legend to the top
+      bgcolor = "rgba(255, 255, 255, 0.7)",  # Add a semi-transparent background to avoid overlap
+      bordercolor = "black",  # Optional: Add a border for better visibility
+      borderwidth = 1  # Optional: Border width
+    ),
+    margin = list(l = 50, r = 320, b = 50, t = 50, pad = 4)  # Adjust margins to make space for the legend and reduce left blank space
+  )
+```
+</div>
+

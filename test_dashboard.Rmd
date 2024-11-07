@@ -14,9 +14,11 @@ knitr::opts_chunk$set(
 )
 
 library(crosstalk)
-library(dplyr)
+library(tidyverse)
 library(glue)
 library(plotly)
+library(ggplot2)  
+library(reshape2)
 ```
 
 ```{js}
@@ -140,3 +142,43 @@ shared_data_ESBL %>%
 
 ### Note
 This shows isolates that were *phenotypically* sensitive to amoxicillin and co-amoxiclav but had an ESBL mechanism detected on ESBL plates as orange.
+
+# Heatmap 
+
+### Heat Map of Antibiotic Resistance
+
+```{r heatmap_setup}
+# Calculate resistance rates
+resistance_rate <- pseudo_data %>%
+  group_by(Organism, Antibiotic) %>%
+  summarize(ResistanceRate = mean(Sensitivity == "R")) %>%
+  ungroup()
+
+# Reshape the data into a matrix format for the heatmap
+heatmap_data <- resistance_rate %>%
+  pivot_wider(names_from = Antibiotic, values_from = ResistanceRate)
+```
+```{r heatmap_figure}
+# Convert the data to a matrix format suitable for plotly
+heatmap_matrix <- as.matrix(heatmap_data[,-1])  # Exclude the Organism column
+
+# Create the heatmap
+fig <- plot_ly(
+  x = colnames(heatmap_matrix), 
+  y = heatmap_data$Organism, 
+  z = heatmap_matrix, 
+  type = "heatmap",
+  colors = colorRamp(c("white", "red"))
+)
+
+# Customize the layout
+fig <- fig %>% layout(
+  title = "Resistance Rates Heatmap",
+  xaxis = list(title = "Antibiotic"),
+  yaxis = list(title = "Organism")
+)
+
+# Render the plot in the RMarkdown document
+fig
+```
+
