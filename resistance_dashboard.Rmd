@@ -50,6 +50,8 @@ This is an example of a resistance dashboard.  It is intended as a template for 
 
 It is distributed under an MIT license, meaning I can't accept any responsiblity for stuff going wrong as a result of it, but you are completely free to use and adapt it to any end you see fit.
 
+Please note that the data used to make this is fictional and for illustration purposes only.  I have tried to make it roughly true to life but if you spot some odd resistance patterns then that will be why!
+
 Below are some auto-calculations about the pipeline that I think are useful to see:
 
 This pipeline was run on the `r format(Sys.Date(), "%d/%m/%Y")`

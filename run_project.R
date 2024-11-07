@@ -65,3 +65,10 @@ rmarkdown::render(
   output_file = glue::glue("{html_output_name}.html"),
   envir = new.env()
 )
+
+# Render the dashboard to index HTML (this isn't needed for local projects - I'm just using it to host a live page on GitHub)
+rmarkdown::render(
+  here::here("resistance_dashboard.Rmd"),
+  output_file = glue::glue("index.html"),
+  envir = new.env()
+)
