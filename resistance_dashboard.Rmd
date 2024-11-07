@@ -48,7 +48,9 @@ const removeAllOption = function(filterId) {
 
 This is an example of a resistance dashboard.  It is intended as a template for you to use locally and adapt to your needs. 
 
-It is distributed under an MIT license, meaning I can't accept any responsiblity for stuff going wrong as a result of it, but you are completely free to use and adapt it to any end you see fit.
+The full source code, along with instructions can be found on [my GitHub](https://github.com/jackwgoodall/Resistance_dashboard)
+
+It is distributed under an MIT license, meaning I can't accept any responsibility for stuff going wrong as a result of it, but you are completely free to use and adapt it to any end you see fit.
 
 Please note that the data used to make this is fictional and for illustration purposes only.  I have tried to make it roughly true to life but if you spot some odd resistance patterns then that will be why!
 
