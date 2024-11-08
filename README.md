@@ -34,11 +34,11 @@ Our input data looks like this:
 | 01/01/2024    | ESCO     | Escherichia coli | Amp/amoxicillin | R           | GP            | 1  | MU00001  | MU00001       |
 
 **Here:**
-DTC = date collected
-Organism = the EUCAST organism code
-OrgDescription = human readable version of the organism 
-Location_Code = this is the code of the location it has come from (there are lots of these but I have simplified to GP / inpatient for the dummy data)
-ID = is the organism ID *in that sample*.  I.e. if there is a Klebsiella and a Pseudomonas in a urine sample one will get ID 1 and one ID 2. 
+DTC = date collected <br>
+Organism = the EUCAST organism code <br>
+OrgDescription = human readable version of the organism <br> 
+Location_Code = this is the code of the location it has come from (there are lots of these but I have simplified to GP / inpatient for the dummy data) <br>
+ID = is the organism ID *in that sample*.  I.e. if there is a Klebsiella and a Pseudomonas in a urine sample one will get ID 1 and one ID 2. <br>
 
 Please do feel free to ask questions on this page and to suggest improvements and refinments. 
 
