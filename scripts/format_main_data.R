@@ -40,10 +40,10 @@ clean_df <- df %>%
          !grepl("^\\(Not\\)|^\\(\\?\\)", OrgDescrip)) # anything that matches (?) or (not)
 
 
-# Remove SCH & others
+# Remove unwanted locations
 #clean_df <- clean_df %>%                   ### This could be used to filter out areas you don't want to include e.g. other
-#  filter(Dept_Code != "SCH" &              ### hosptials you process samples for
-#           Dept_Code != "DON1F") 
+#  filter(Dept_Code != "DGH" &              ### hosptials you process samples for
+#           Dept_Code != "out_patients") 
 
 # Remove screening 
 clean_df <- clean_df %>%                               ### This is used to remove screening samples (e.g MRSA/CPE screening plates)
