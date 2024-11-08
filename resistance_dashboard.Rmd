@@ -48,11 +48,13 @@ const removeAllOption = function(filterId) {
 
 This is an example of a resistance dashboard.  It is intended as a template for you to use locally and adapt to your needs. 
 
-It is distributed under an MIT license, meaning I can't accept any responsiblity for stuff going wrong as a result of it, but you are completely free to use and adapt it to any end you see fit.
+The full source code, along with instructions can be found on [my GitHub](https://github.com/jackwgoodall/Resistance_dashboard).
+
+It is distributed under an MIT license, meaning you are completely free to use and adapt it to any end you see fit (although I can't accept any responsibility for stuff going wrong as a result of it...)
 
 Please note that the data used to make this is fictional and for illustration purposes only.  I have tried to make it roughly true to life but if you spot some odd resistance patterns then that will be why!
 
-Below are some auto-calculations about the pipeline that I think are useful to see:
+Below are some auto-calculations that are on the front page of our 'real' resistance dashboard about the pipeline that I think are useful to see:
 
 This pipeline was run on the `r format(Sys.Date(), "%d/%m/%Y")`
 
@@ -60,7 +62,7 @@ It includes isolates from `r format(Start, "%d/%m/%Y")` to the `r format(End, "%
 
 This dataset includes `r format(isolate_numbers, big.mark = ",")` organisms, from `r format(specimen_numbers, big.mark = ",")` specimens, from `r format(patient_numbers, big.mark = ",")` different patients.
 
-If you would like help localising this or have a problem please open a GitHub issue.  If you want to get in touch or to can't share your question publicaly then email me <a href="mailto:j.goodall8@sheffield.ac.ukc?subject=resistance%20dashboard%20feature%20request"</a>
+If you would like help localising this or have a problem please open a GitHub issue.  If you would like help localising this or have a problem, please open a GitHub issue. If you want to get in touch but can’t share your question publicly, you can email me at [j.goodall8@sheffield.ac.uk](mailto:j.goodall@sheffield.ac.uk?subject=resistance%20dashboard%20feature%20request).
 
 # All Samples {.tabset}
 
